@@ -14,7 +14,7 @@
     "dev": "tsx src/index.ts",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "test": "vitest",
+    "test": "vitest run --passWithNoTests",
     "prepack": "npm run build"
   },
   "keywords": [
