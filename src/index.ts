@@ -48,6 +48,7 @@ import { toggleFlagEnvironmentTool } from './tools/toggleFlagEnvironment.js';
 import { wrapChangeTool } from './tools/wrapChange.js';
 import { UnleashClient } from './unleash/client.js';
 import { VERSION } from './version.js';
+import { ToolType } from './tools/types.js';
 
 /**
  * Main entry point for the MCP server.
@@ -121,7 +122,7 @@ async function main(): Promise<void> {
     removeFlagStrategyTool,
   ];
 
-  tools.forEach((tool) => {
+  tools.forEach((tool: ToolType) => {
     server.registerTool(
       tool.name,
       {
