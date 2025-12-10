@@ -105,12 +105,11 @@ export async function toggleFlagEnvironment(
           text: messageLines.join('\n'),
         },
         {
-          type: 'resource',
-          resource: {
-            uri: resource.uri,
-            mimeType: resource.mimeType,
-            text: resource.text,
-          },
+          type: 'resource_link',
+          name: feature.name,
+          uri: resource.uri,
+          mimeType: resource.mimeType,
+          title: resource.text,
         },
       ],
       structuredContent,

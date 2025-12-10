@@ -122,12 +122,11 @@ export async function setFlagRollout(
           text: `${message}\nView feature: ${url}\nAdmin API: ${apiUrl}`,
         },
         {
-          type: 'resource',
-          resource: {
-            uri: resource.uri,
-            mimeType: resource.mimeType,
-            text: resource.text,
-          },
+          type: 'resource_link',
+          name: input.featureName,
+          uri: resource.uri,
+          mimeType: resource.mimeType,
+          title: resource.text,
         },
       ],
       structuredContent: {
