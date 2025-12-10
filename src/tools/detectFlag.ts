@@ -16,19 +16,31 @@
  * 5. Tool integrates result into evaluation workflow
  */
 
+import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { ServerContext, handleToolError } from '../context.js';
-import { generateDiscoveryInstructions, DiscoveryInput } from '../detection/flagDiscovery.js';
+import { handleToolError, type ServerContext } from '../context.js';
+import { type DiscoveryInput, generateDiscoveryInstructions } from '../detection/flagDiscovery.js';
 import { getScoringGuidance } from '../detection/flagScoring.js';
 
 /**
  * Input schema for the detect_flag tool
  */
 const detectFlagInputSchema = z.object({
-  description: z.string().min(1).describe('Description of the change or feature to find flags for'),
-  files: z.array(z.string()).optional().describe('Optional list of files being modified'),
-  codeContext: z.string().optional().describe('Optional code context to analyze for nearby flags'),
+  description: z
+    .string()
+    .min(1)
+    .describe(
+      'Description of the change or feature you want to find flags for (e.g., "payment processing with Stripe")',
+    ),
+  files: z
+    .array(z.string())
+    .optional()
+    .describe('Optional: List of files being modified to search for flags in the same area'),
+  codeContext: z
+    .string()
+    .optional()
+    .describe('Optional: Code context around the modification point to analyze for nearby flags'),
 });
 
 type DetectFlagInput = z.infer<typeof detectFlagInputSchema>;
@@ -40,10 +52,7 @@ type DetectFlagInput = z.infer<typeof detectFlagInputSchema>;
  * in the codebase. The LLM will execute these instructions and return
  * the best candidate flag.
  */
-export async function detectFlag(
-  context: ServerContext,
-  args: unknown
-): Promise<CallToolResult> {
+export async function detectFlag(context: ServerContext, args: unknown): Promise<CallToolResult> {
   try {
     // Validate input
     const input: DetectFlagInput = detectFlagInputSchema.parse(args);
@@ -88,7 +97,7 @@ export async function detectFlag(
 function buildDetectionGuidance(
   instructions: string,
   scoringGuidance: string,
-  description: string
+  description: string,
 ): string {
   return `
 # Existing Flag Detection
@@ -188,23 +197,6 @@ Returns markdown guidance with:
 
 After following the instructions and finding results, you should return a JSON object
 indicating whether a flag was found and, if so, its details with a confidence score.`,
-  inputSchema: {
-    type: 'object',
-    properties: {
-      description: {
-        type: 'string',
-        description: 'Description of the change or feature you want to find flags for (e.g., "payment processing with Stripe")',
-      },
-      files: {
-        type: 'array',
-        items: { type: 'string' },
-        description: 'Optional: List of files being modified to search for flags in the same area',
-      },
-      codeContext: {
-        type: 'string',
-        description: 'Optional: Code context around the modification point to analyze for nearby flags',
-      },
-    },
-    required: ['description'],
-  },
+  inputSchema: detectFlagInputSchema satisfies AnySchema,
+  implementation: detectFlag,
 };

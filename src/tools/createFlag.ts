@@ -1,20 +1,44 @@
+import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { ServerContext, ensureProjectId, handleToolError } from '../context.js';
-import { FeatureFlagType } from '../unleash/client.js';
-import { notifyProgress, createFlagResourceLink, formatFlagCreatedMessage } from '../utils/streaming.js';
+import { ensureProjectId, handleToolError, type ServerContext } from '../context.js';
+import type { FeatureFlagType } from '../unleash/client.js';
+import {
+  createFlagResourceLink,
+  formatFlagCreatedMessage,
+  notifyProgress,
+} from '../utils/streaming.js';
 
 /**
  * Input schema for the create_flag tool.
  * Validates all required parameters using Zod.
  */
 const createFeatureFlagSchema = z.object({
-  projectId: z.string().optional().describe('Project ID where the flag will be created (optional if default is set)'),
-  name: z.string().min(1).describe('Feature flag name (must be unique within the project)'),
-  type: z.enum(['release', 'experiment', 'operational', 'kill-switch', 'permission'])
+  projectId: z
+    .string()
+    .optional()
+    .describe(
+      'Project ID where the flag will be created (optional if UNLEASH_DEFAULT_PROJECT is set)',
+    ),
+  name: z
+    .string()
+    .min(1)
+    .describe(
+      'Feature flag name (must be unique within the project). Use descriptive names like "new-checkout-flow"',
+    ),
+  type: z
+    .enum(['release', 'experiment', 'operational', 'kill-switch', 'permission'])
     .describe('Feature flag type - determines the lifecycle and usage pattern'),
-  description: z.string().min(1).describe('Clear description of what this flag controls and why it exists'),
-  impressionData: z.boolean().optional().describe('Enable impression data collection for analytics (optional)'),
+  description: z
+    .string()
+    .min(1)
+    .describe(
+      'Clear description of what this flag controls, why it exists, and when it should be removed',
+    ),
+  impressionData: z
+    .boolean()
+    .optional()
+    .describe('Enable impression data collection for analytics (optional, defaults to false)'),
 });
 
 type CreateFeatureFlagInput = z.infer<typeof createFeatureFlagSchema>;
@@ -38,7 +62,7 @@ type CreateFeatureFlagInput = z.infer<typeof createFeatureFlagSchema>;
 export async function createFlag(
   context: ServerContext,
   args: unknown,
-  progressToken?: string | number
+  progressToken?: string | number,
 ): Promise<CallToolResult> {
   try {
     // Validate input
@@ -55,7 +79,7 @@ export async function createFlag(
       progressToken,
       0,
       100,
-      `Creating feature flag "${input.name}"...`
+      `Creating feature flag "${input.name}"...`,
     );
 
     // Call Unleash API to create the flag
@@ -72,14 +96,14 @@ export async function createFlag(
       progressToken,
       100,
       100,
-      `Feature flag "${input.name}" created successfully`
+      `Feature flag "${input.name}" created successfully`,
     );
 
     // Create resource link
     const { url, resource } = createFlagResourceLink(
       context.config.unleash.baseUrl,
       projectId,
-      response.name
+      response.name,
     );
 
     // Format success message
@@ -87,7 +111,7 @@ export async function createFlag(
       response.name,
       projectId,
       url,
-      context.config.server.dryRun
+      context.config.server.dryRun,
     );
 
     context.logger.info(message);
@@ -120,11 +144,12 @@ export async function createFlag(
           text: `${message}\nAdmin API: ${apiUrl}`,
         },
         {
-          type: 'resource_link',
-          name: response.name,
-          uri: resource.uri,
-          mimeType: resource.mimeType,
-          text: resource.text,
+          type: 'resource',
+          resource: {
+            uri: resource.uri,
+            mimeType: resource.mimeType,
+            text: resource.text,
+          },
         },
       ],
       structuredContent,
@@ -156,31 +181,6 @@ Best practices:
 4. Plan for flag removal after successful rollout
 
 See: https://docs.getunleash.io/topics/feature-flags/best-practices-using-feature-flags-at-scale`,
-  inputSchema: {
-    type: 'object',
-    properties: {
-      projectId: {
-        type: 'string',
-        description: 'Project ID where the flag will be created (optional if UNLEASH_DEFAULT_PROJECT is set)',
-      },
-      name: {
-        type: 'string',
-        description: 'Feature flag name (must be unique within the project). Use descriptive names like "new-checkout-flow"',
-      },
-      type: {
-        type: 'string',
-        enum: ['release', 'experiment', 'operational', 'kill-switch', 'permission'],
-        description: 'Feature flag type - determines the lifecycle and usage pattern',
-      },
-      description: {
-        type: 'string',
-        description: 'Clear description of what this flag controls, why it exists, and when it should be removed',
-      },
-      impressionData: {
-        type: 'boolean',
-        description: 'Enable impression data collection for analytics (optional, defaults to false)',
-      },
-    },
-    required: ['name', 'type', 'description'],
-  },
+  inputSchema: createFeatureFlagSchema satisfies AnySchema,
+  implementation: createFlag,
 };

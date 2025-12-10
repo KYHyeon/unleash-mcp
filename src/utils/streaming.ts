@@ -1,4 +1,4 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { buildFeatureFlagUri } from '../resources/unleashResources.js';
 
 /**
@@ -6,18 +6,18 @@ import { buildFeatureFlagUri } from '../resources/unleashResources.js';
  * Provides visibility into long-running operations for the LLM.
  */
 export async function notifyProgress(
-  server: Server,
+  server: McpServer,
   progressToken: string | number | undefined,
   progress: number,
   total: number,
-  message: string
+  message: string,
 ): Promise<void> {
   if (progressToken === undefined) {
     return;
   }
 
   try {
-    await server.notification({
+    await server.server.notification({
       method: 'notifications/progress',
       params: {
         progressToken,
@@ -27,7 +27,7 @@ export async function notifyProgress(
     });
 
     // Also send a message notification for visibility
-    await server.notification({
+    await server.server.notification({
       method: 'notifications/message',
       params: {
         level: 'info',
@@ -35,7 +35,7 @@ export async function notifyProgress(
         data: message,
       },
     });
-  } catch (error) {
+  } catch (_error) {
     // Silently ignore notification errors - the client may not support them
     // The operation will continue successfully regardless
   }
@@ -48,8 +48,8 @@ export async function notifyProgress(
 export function createFlagResourceLink(
   baseUrl: string,
   projectId: string,
-  flagName: string
-): { url: string; resource: { uri: string; mimeType?: string; text?: string } } {
+  flagName: string,
+): { url: string; resource: { uri: string; mimeType?: string; text: string } } {
   // Unleash Admin UI URL for the feature flag
   const url = `${baseUrl}/projects/${projectId}/features/${flagName}`;
 
@@ -70,7 +70,7 @@ export function formatFlagCreatedMessage(
   flagName: string,
   projectId: string,
   url: string,
-  dryRun: boolean
+  dryRun: boolean,
 ): string {
   if (dryRun) {
     return `[DRY RUN] Would create feature flag "${flagName}" in project "${projectId}".\nURL: ${url}`;
