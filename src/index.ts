@@ -45,10 +45,10 @@ import { getFlagStateTool } from './tools/getFlagState.js';
 import { removeFlagStrategyTool } from './tools/removeFlagStrategy.js';
 import { setFlagRolloutTool } from './tools/setFlagRollout.js';
 import { toggleFlagEnvironmentTool } from './tools/toggleFlagEnvironment.js';
+import type { ToolType } from './tools/types.js';
 import { wrapChangeTool } from './tools/wrapChange.js';
 import { UnleashClient } from './unleash/client.js';
 import { VERSION } from './version.js';
-import { ToolType } from './tools/types.js';
 
 /**
  * Main entry point for the MCP server.
