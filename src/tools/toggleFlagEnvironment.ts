@@ -1,4 +1,3 @@
-import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { ensureProjectId, handleToolError, type ServerContext } from '../context.js';
@@ -123,6 +122,6 @@ export const toggleFlagEnvironmentTool = {
   name: 'toggle_flag_environment',
   description:
     'Enable or disable a feature flag in a specific environment using the Unleash Admin API. For gradual rollouts, configure a flexibleRollout strategy first via set_flag_rollout.',
-  inputSchema: toggleFlagEnvironmentSchema satisfies AnySchema,
+  inputSchema: toggleFlagEnvironmentSchema,
   implementation: toggleFlagEnvironment,
 };

@@ -1,4 +1,3 @@
-import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { ensureProjectId, handleToolError, type ServerContext } from '../context.js';
@@ -180,6 +179,6 @@ Best practices:
 4. Plan for flag removal after successful rollout
 
 See: https://docs.getunleash.io/topics/feature-flags/best-practices-using-feature-flags-at-scale`,
-  inputSchema: createFeatureFlagSchema satisfies AnySchema,
+  inputSchema: createFeatureFlagSchema,
   implementation: createFlag,
 };

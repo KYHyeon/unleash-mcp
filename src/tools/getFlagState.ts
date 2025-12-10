@@ -1,4 +1,3 @@
-import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { ensureProjectId, handleToolError, type ServerContext } from '../context.js';
@@ -133,6 +132,6 @@ export const getFlagStateTool = {
   name: 'get_flag_state',
   description:
     'Fetch the current feature flag metadata and environment strategies from the Unleash Admin API.',
-  inputSchema: getFlagStateSchema satisfies AnySchema,
+  inputSchema: getFlagStateSchema,
   implementation: getFlagState,
 };

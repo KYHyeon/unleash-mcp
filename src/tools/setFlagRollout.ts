@@ -1,4 +1,3 @@
-import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { ensureProjectId, handleToolError, type ServerContext } from '../context.js';
@@ -152,6 +151,6 @@ export async function setFlagRollout(
 export const setFlagRolloutTool = {
   name: 'set_flag_rollout',
   description: `Configure or update a flexibleRollout strategy for a feature flag environment with an optional rollout percentage and variants. This does NOT enable the feature; call toggle_flag_environment to turn environments on or off.`,
-  inputSchema: setFlagRolloutSchema satisfies AnySchema,
+  inputSchema: setFlagRolloutSchema,
   implementation: setFlagRollout,
 };

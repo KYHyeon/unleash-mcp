@@ -14,7 +14,6 @@
  * 4. LLM reports back with summary of changes
  */
 
-import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { handleToolError, type ServerContext } from '../context.js';
@@ -302,6 +301,6 @@ It guides you through:
 
 This tool is inspired by the Unleash AI flag cleanup workflow used in production.
 See: https://github.com/Unleash/unleash/blob/main/.github/workflows/ai-flag-cleanup-pr.yml`,
-  inputSchema: cleanupFlagInputSchema satisfies AnySchema,
+  inputSchema: cleanupFlagInputSchema,
   implementation: cleanupFlag,
 };

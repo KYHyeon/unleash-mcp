@@ -1,4 +1,3 @@
-import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { ensureProjectId, handleToolError, type ServerContext } from '../context.js';
@@ -125,6 +124,6 @@ export const removeFlagStrategyTool = {
   name: 'remove_flag_strategy',
   description:
     'Delete a strategy configuration from a feature flag environment. Use get_flag_state to discover strategy IDs before removal.',
-  inputSchema: removeFlagStrategySchema satisfies AnySchema,
+  inputSchema: removeFlagStrategySchema,
   implementation: removeFlagStrategy,
 };

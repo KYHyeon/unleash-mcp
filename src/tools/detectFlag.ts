@@ -16,7 +16,6 @@
  * 5. Tool integrates result into evaluation workflow
  */
 
-import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { handleToolError, type ServerContext } from '../context.js';
@@ -197,6 +196,6 @@ Returns markdown guidance with:
 
 After following the instructions and finding results, you should return a JSON object
 indicating whether a flag was found and, if so, its details with a confidence score.`,
-  inputSchema: detectFlagInputSchema satisfies AnySchema,
+  inputSchema: detectFlagInputSchema,
   implementation: detectFlag,
 };

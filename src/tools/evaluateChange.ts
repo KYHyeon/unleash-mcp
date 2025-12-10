@@ -6,7 +6,6 @@
  * that helps LLMs make informed decisions about flag usage.
  */
 
-import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { handleToolError, type ServerContext } from '../context.js';
@@ -543,6 +542,6 @@ When this tool determines a flag is needed, it provides explicit instructions to
 3. Implement the wrapped code following the patterns
 
 The tool returns markdown-formatted guidance that helps you make informed decisions and take the correct next actions.`,
-  inputSchema: evaluateChangeInputSchema satisfies AnySchema,
+  inputSchema: evaluateChangeInputSchema,
   implementation: evaluateChange,
 };

@@ -1,4 +1,3 @@
-import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { handleToolError, type ServerContext } from '../context.js';
@@ -87,9 +86,8 @@ export async function wrapChange(context: ServerContext, args: unknown): Promise
     // Try to get framework-specific template if hint provided
     let recommendedTemplate = getDefaultTemplate(language, input.flagName);
     if (input.frameworkHint) {
-      const frameworkTemplate = allTemplates.find((t) =>
-        t.framework?.toLowerCase().includes(input.frameworkHint?.toLowerCase()),
-      );
+      const hint = input.frameworkHint.toLowerCase();
+      const frameworkTemplate = allTemplates.find((t) => t.framework?.toLowerCase().includes(hint));
       if (frameworkTemplate) {
         recommendedTemplate = frameworkTemplate;
         context.logger.debug(`Found framework-specific template: ${input.frameworkHint}`);
@@ -349,6 +347,6 @@ Usage:
 4. Test your implementation
 
 Best suited for use after evaluate_change recommends a flag and create_flag creates it.`,
-  inputSchema: wrapChangeSchema satisfies AnySchema,
+  inputSchema: wrapChangeSchema,
   implementation: wrapChange,
 };
