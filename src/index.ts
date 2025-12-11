@@ -25,11 +25,18 @@
 
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import type { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
+import { UriTemplate } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
 import { loadConfig } from './config.js';
 import { createLogger, type ServerContext } from './context.js';
 import {
+  extractFlagNameFromFeatureUri,
+  extractProjectIdFromFeatureUri,
   FEATURE_FLAG_RESOURCE_URI,
   FEATURE_FLAGS_RESOURCE_TEMPLATE,
+  isFeatureFlagsUri,
+  isFeatureFlagUri,
+  isProjectsUri,
   PROJECTS_RESOURCE_TEMPLATE,
   parseFeatureFlagsResourceOptions,
   parseProjectsResourceOptions,
@@ -51,6 +58,20 @@ import { UnleashClient } from './unleash/client.js';
 import { enableStdioLogging } from './utils/stdioLogging.js';
 import { notifyProgress } from './utils/streaming.js';
 import { VERSION } from './version.js';
+
+class OptionalQueryUriTemplate extends UriTemplate {
+  #matchFn: (uri: string) => Variables | null;
+
+  constructor(template: string, matchFn: (uri: string) => Variables | null) {
+    super(template);
+    this.#matchFn = matchFn;
+  }
+
+  // Override default matching to tolerate missing optional query params.
+  match(uri: string): Variables | null {
+    return this.#matchFn(uri);
+  }
+}
 
 /**
  * Main entry point for the MCP server.
@@ -161,9 +182,12 @@ main().catch((error) => {
 });
 
 function registerResources(server: McpServer, context: ServerContext): void {
-  const projectsTemplate = new ResourceTemplate(PROJECTS_RESOURCE_TEMPLATE, {
-    list: undefined,
-  });
+  const projectsTemplate = new ResourceTemplate(
+    new OptionalQueryUriTemplate(PROJECTS_RESOURCE_TEMPLATE, (uri) =>
+      isProjectsUri(uri) ? {} : null,
+    ),
+    { list: undefined },
+  );
 
   server.registerResource(
     'unleash-projects-filtered',
@@ -178,9 +202,17 @@ function registerResources(server: McpServer, context: ServerContext): void {
     }),
   );
 
-  const featureFlagsTemplate = new ResourceTemplate(FEATURE_FLAGS_RESOURCE_TEMPLATE, {
-    list: undefined,
-  });
+  const featureFlagsTemplate = new ResourceTemplate(
+    new OptionalQueryUriTemplate(FEATURE_FLAGS_RESOURCE_TEMPLATE, (uri) => {
+      if (!isFeatureFlagsUri(uri)) {
+        return null;
+      }
+
+      const projectId = extractProjectIdFromFeatureUri(uri);
+      return projectId ? { projectId } : null;
+    }),
+    { list: undefined },
+  );
 
   server.registerResource(
     'unleash-feature-flags-by-project',
@@ -208,9 +240,23 @@ function registerResources(server: McpServer, context: ServerContext): void {
     },
   );
 
-  const featureFlagTemplate = new ResourceTemplate(FEATURE_FLAG_RESOURCE_URI, {
-    list: undefined,
-  });
+  const featureFlagTemplate = new ResourceTemplate(
+    new OptionalQueryUriTemplate(FEATURE_FLAG_RESOURCE_URI, (uri) => {
+      if (!isFeatureFlagUri(uri)) {
+        return null;
+      }
+
+      const projectId = extractProjectIdFromFeatureUri(uri);
+      const flagName = extractFlagNameFromFeatureUri(uri);
+
+      if (!projectId || !flagName) {
+        return null;
+      }
+
+      return { projectId, flagName };
+    }),
+    { list: undefined },
+  );
 
   server.registerResource(
     'unleash-feature-flag',
