@@ -25,7 +25,6 @@
 
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import type { AnySchema } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import { loadConfig } from './config.js';
 import { createLogger, type ServerContext } from './context.js';
 import {
@@ -46,15 +45,20 @@ import { getFlagStateTool } from './tools/getFlagState.js';
 import { removeFlagStrategyTool } from './tools/removeFlagStrategy.js';
 import { setFlagRolloutTool } from './tools/setFlagRollout.js';
 import { toggleFlagEnvironmentTool } from './tools/toggleFlagEnvironment.js';
-import type { ToolType } from './tools/types.js';
+import type { ToolDefinition } from './tools/types.js';
 import { wrapChangeTool } from './tools/wrapChange.js';
 import { UnleashClient } from './unleash/client.js';
+import { enableStdioLogging } from './utils/stdioLogging.js';
+import { notifyProgress } from './utils/streaming.js';
 import { VERSION } from './version.js';
 
 /**
  * Main entry point for the MCP server.
  */
 async function main(): Promise<void> {
+  // Optional diagnostic logging of stdio without modifying protocol flow.
+  enableStdioLogging();
+
   // Load and validate configuration
   const config = loadConfig();
   const logger = createLogger(config.server.logLevel);
@@ -103,15 +107,15 @@ async function main(): Promise<void> {
 
   // Build shared context
   const context: ServerContext = {
-    server,
     config,
     unleashClient,
     logger,
+    notifyProgress: notifyProgress(server),
   };
 
   type ProgressExtra = { _meta?: { progressToken?: string | number } };
 
-  const tools: ToolType[] = [
+  const tools: ToolDefinition[] = [
     createFlagTool,
     evaluateChangeTool,
     detectFlagTool,
@@ -123,18 +127,25 @@ async function main(): Promise<void> {
     removeFlagStrategyTool,
   ];
 
+  // this is needed to work around a typing issue in the MCP SDK
+  const registerTool = server.registerTool.bind(server) as (
+    name: string,
+    config: { description?: string; inputSchema?: ToolDefinition['inputSchema'] },
+    cb: (args: unknown, extra: ProgressExtra) => unknown,
+  ) => unknown;
+
   tools.forEach((tool) => {
-    server.registerTool(
+    registerTool(
       tool.name,
       {
         description: tool.description,
-        inputSchema: tool.inputSchema as AnySchema,
+        inputSchema: tool.inputSchema,
       },
       (args: unknown, extra: ProgressExtra) =>
         tool.implementation(context, args, extra._meta?.progressToken),
     );
   });
-  registerResources(context);
+  registerResources(server, context);
 
   // Start server with stdio transport
   const transport = new StdioServerTransport();
@@ -149,12 +160,12 @@ main().catch((error) => {
   process.exit(1);
 });
 
-function registerResources(context: ServerContext): void {
+function registerResources(server: McpServer, context: ServerContext): void {
   const projectsTemplate = new ResourceTemplate(PROJECTS_RESOURCE_TEMPLATE, {
     list: undefined,
   });
 
-  context.server.registerResource(
+  server.registerResource(
     'unleash-projects-filtered',
     projectsTemplate,
     {
@@ -171,7 +182,7 @@ function registerResources(context: ServerContext): void {
     list: undefined,
   });
 
-  context.server.registerResource(
+  server.registerResource(
     'unleash-feature-flags-by-project',
     featureFlagsTemplate,
     {
@@ -201,7 +212,7 @@ function registerResources(context: ServerContext): void {
     list: undefined,
   });
 
-  context.server.registerResource(
+  server.registerResource(
     'unleash-feature-flag',
     featureFlagTemplate,
     {

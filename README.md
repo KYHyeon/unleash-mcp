@@ -172,6 +172,12 @@ node dist/index.js --log-level debug
 node dist/index.js --dry-run --log-level debug
 ```
 
+### Logging control
+
+- `LOG_LEVEL` controls application logging verbosity (`debug`, `info`, `warn`, `error`).
+- `APP_LOG_FILE` (optional): if set, application logs are written to this file (not stdout). If unset, logs go to stderr.
+- `MCP_STDIO_LOG_FILE` (optional): if set, MCP stdin/stdout/stderr are tee’d into this single file with channel prefixes. Protocol messages still flow over stdout normally.
+
 ## Tool reference
 
 This section describes each of the core tools in detail, including its purpose, parameters, and output.

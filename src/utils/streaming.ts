@@ -5,41 +5,43 @@ import { buildFeatureFlagUri } from '../resources/unleashResources.js';
  * Helper to emit progress notifications during tool execution.
  * Provides visibility into long-running operations for the LLM.
  */
-export async function notifyProgress(
-  server: McpServer,
-  progressToken: string | number | undefined,
-  progress: number,
-  total: number,
-  message: string,
-): Promise<void> {
-  if (progressToken === undefined) {
-    return;
-  }
+export const notifyProgress = (mcpServer: McpServer) => {
+  const { server } = mcpServer;
+  return async (
+    progressToken: string | number | undefined,
+    progress: number,
+    total: number,
+    message?: string,
+  ): Promise<void> => {
+    if (progressToken === undefined) {
+      return;
+    }
 
-  try {
-    await server.server.notification({
-      method: 'notifications/progress',
-      params: {
-        progressToken,
-        progress,
-        total,
-      },
-    });
+    try {
+      await server.notification({
+        method: 'notifications/progress',
+        params: {
+          progressToken,
+          progress,
+          total,
+        },
+      });
 
-    // Also send a message notification for visibility
-    await server.server.notification({
-      method: 'notifications/message',
-      params: {
-        level: 'info',
-        logger: 'unleash-mcp',
-        data: message,
-      },
-    });
-  } catch (_error) {
-    // Silently ignore notification errors - the client may not support them
-    // The operation will continue successfully regardless
-  }
-}
+      // Also send a message notification for visibility
+      await server.notification({
+        method: 'notifications/message',
+        params: {
+          level: 'info',
+          logger: 'unleash-mcp',
+          data: message,
+        },
+      });
+    } catch (_error) {
+      // Silently ignore notification errors - the client may not support them
+      // The operation will continue successfully regardless
+    }
+  };
+};
 
 /**
  * Helper to create resource links for created feature flags.

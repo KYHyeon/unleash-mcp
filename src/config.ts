@@ -17,7 +17,7 @@ const configSchema = z.object({
   }),
   server: z.object({
     dryRun: z.boolean().default(false),
-    logLevel: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+    logLevel: z.enum(['debug', 'info', 'warn', 'error']).default('error'),
   }),
 });
 
