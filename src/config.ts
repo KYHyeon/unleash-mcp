@@ -64,7 +64,15 @@ export function loadConfig(): Config {
   };
 
   try {
-    return configSchema.parse(rawConfig);
+    const parsed = configSchema.parse(rawConfig);
+
+    return {
+      ...parsed,
+      unleash: {
+        ...parsed.unleash,
+        baseUrl: normalizeBaseUrl(parsed.unleash.baseUrl),
+      },
+    };
   } catch (error) {
     if (error instanceof z.ZodError) {
       const messages = error.errors.map((err) => `  - ${err.path.join('.')}: ${err.message}`);
@@ -73,5 +81,17 @@ export function loadConfig(): Config {
       );
     }
     throw error;
+  }
+}
+
+function normalizeBaseUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    // Collapse multiple slashes in the path and remove a trailing slash (except when path is root).
+    parsed.pathname = parsed.pathname.replace(/\/{2,}/g, '/').replace(/\/+$/, '') || '/';
+    return parsed.toString();
+  } catch {
+    // Fallback: strip trailing slashes only
+    return url.replace(/\/+$/, '');
   }
 }

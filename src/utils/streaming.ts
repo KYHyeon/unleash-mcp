@@ -52,8 +52,8 @@ export function createFlagResourceLink(
   projectId: string,
   flagName: string,
 ): { url: string; resource: { uri: string; mimeType?: string; text: string } } {
-  // Unleash Admin UI URL for the feature flag
-  const url = `${baseUrl}/projects/${projectId}/features/${flagName}`;
+  // Unleash Admin UI URL for the feature flag (normalize to avoid duplicate slashes)
+  const url = normalizeUrl(`${baseUrl}/projects/${projectId}/features/${flagName}`);
 
   return {
     url,
@@ -79,4 +79,18 @@ export function formatFlagCreatedMessage(
   }
 
   return `Successfully created feature flag "${flagName}" in project "${projectId}".\nView in Unleash: ${url}`;
+}
+
+/**
+ * Remove accidental duplicate slashes in the path portion of a URL, preserving the protocol.
+ */
+function normalizeUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    parsed.pathname = parsed.pathname.replace(/\/{2,}/g, '/');
+    return parsed.toString();
+  } catch {
+    // Fallback: best-effort collapse while preserving protocol delimiter
+    return url.replace(/([^:]\/)\/+/g, '$1');
+  }
 }
