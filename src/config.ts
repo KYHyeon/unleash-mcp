@@ -25,11 +25,12 @@ export type Config = z.infer<typeof configSchema>;
 
 /**
  * Parse CLI arguments for --dry-run and --log-level flags.
+ * Log level is optional here because LOG_LEVEL env is the primary source.
  */
-function parseCliFlags(): { dryRun: boolean; logLevel: string } {
+function parseCliFlags(): { dryRun: boolean; logLevel?: string } {
   const args = process.argv.slice(2);
   let dryRun = false;
-  let logLevel = 'info';
+  let logLevel: string | undefined;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--dry-run') {
@@ -49,6 +50,7 @@ function parseCliFlags(): { dryRun: boolean; logLevel: string } {
  */
 export function loadConfig(): Config {
   const cliFlags = parseCliFlags();
+  const logLevel = cliFlags.logLevel ?? process.env.LOG_LEVEL;
 
   const rawConfig = {
     unleash: {
@@ -59,7 +61,7 @@ export function loadConfig(): Config {
     },
     server: {
       dryRun: cliFlags.dryRun,
-      logLevel: cliFlags.logLevel,
+      logLevel,
     },
   };
 
