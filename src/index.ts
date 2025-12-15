@@ -59,17 +59,17 @@ import { enableStdioLogging } from './utils/stdioLogging.js';
 import { notifyProgress } from './utils/streaming.js';
 import { VERSION } from './version.js';
 
-class OptionalQueryUriTemplate extends UriTemplate {
-  #matchFn: (uri: string) => Variables | null;
+class UriTemplateWithMatcher extends UriTemplate {
+  matchFn: (uri: string) => Variables | null;
 
   constructor(template: string, matchFn: (uri: string) => Variables | null) {
     super(template);
-    this.#matchFn = matchFn;
+    this.matchFn = matchFn;
   }
 
   // Override default matching to tolerate missing optional query params.
   match(uri: string): Variables | null {
-    return this.#matchFn(uri);
+    return this.matchFn(uri);
   }
 }
 
@@ -183,7 +183,7 @@ main().catch((error) => {
 
 function registerResources(server: McpServer, context: ServerContext): void {
   const projectsTemplate = new ResourceTemplate(
-    new OptionalQueryUriTemplate(PROJECTS_RESOURCE_TEMPLATE, (uri) =>
+    new UriTemplateWithMatcher(PROJECTS_RESOURCE_TEMPLATE, (uri) =>
       isProjectsUri(uri) ? {} : null,
     ),
     { list: undefined },
@@ -203,7 +203,7 @@ function registerResources(server: McpServer, context: ServerContext): void {
   );
 
   const featureFlagsTemplate = new ResourceTemplate(
-    new OptionalQueryUriTemplate(FEATURE_FLAGS_RESOURCE_TEMPLATE, (uri) => {
+    new UriTemplateWithMatcher(FEATURE_FLAGS_RESOURCE_TEMPLATE, (uri) => {
       if (!isFeatureFlagsUri(uri)) {
         return null;
       }
@@ -241,7 +241,7 @@ function registerResources(server: McpServer, context: ServerContext): void {
   );
 
   const featureFlagTemplate = new ResourceTemplate(
-    new OptionalQueryUriTemplate(FEATURE_FLAG_RESOURCE_URI, (uri) => {
+    new UriTemplateWithMatcher(FEATURE_FLAG_RESOURCE_URI, (uri) => {
       if (!isFeatureFlagUri(uri)) {
         return null;
       }
