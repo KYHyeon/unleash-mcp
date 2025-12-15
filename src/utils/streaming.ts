@@ -28,14 +28,16 @@ export const notifyProgress = (mcpServer: McpServer) => {
       });
 
       // Also send a message notification for visibility
-      await server.notification({
-        method: 'notifications/message',
-        params: {
-          level: 'info',
-          logger: 'unleash-mcp',
-          data: message,
-        },
-      });
+      if (message !== undefined) {
+        await server.notification({
+          method: 'notifications/message',
+          params: {
+            level: 'info',
+            logger: 'unleash-mcp',
+            data: message,
+          },
+        });
+      }
     } catch (_error) {
       // Silently ignore notification errors - the client may not support them
       // The operation will continue successfully regardless
