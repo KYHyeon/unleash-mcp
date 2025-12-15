@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { ensureProjectId, handleToolError, type ServerContext } from '../context.js';
 import type { FeatureFlagType } from '../unleash/client.js';
 import { createFlagResourceLink, formatFlagCreatedMessage } from '../utils/streaming.js';
-import type { ToolDefinition } from './types.js';
 
 /**
  * Input schema for the create_flag tool.
@@ -151,7 +150,7 @@ export async function createFlag(
 /**
  * Tool definition for MCP server registration.
  */
-export const createFlagTool: ToolDefinition = {
+export const createFlagTool = {
   name: 'create_flag',
   description: `Create a new feature flag in Unleash.
 
