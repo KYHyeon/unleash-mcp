@@ -33,14 +33,24 @@ export function enableStdioLogging(): void {
 
   // Patch stdout/stderr writes to tee to file while preserving normal behavior.
   const originalStdoutWrite = process.stdout.write.bind(process.stdout);
-  process.stdout.write = (chunk: any, encoding?: any, cb?: any) => {
+  process.stdout.write = (
+    chunk: Uint8Array | string,
+    encoding?: BufferEncoding | ((err?: Error) => void),
+    cb?: (err?: Error) => void
+  ): boolean => {
     append(logFile, 'stdout', chunk.toString());
-    return originalStdoutWrite(chunk, encoding, cb);
+    // @ts-expect-error: originalStdoutWrite may have a slightly different signature, but this matches Node.js types
+    return originalStdoutWrite(chunk, encoding as any, cb);
   };
 
   const originalStderrWrite = process.stderr.write.bind(process.stderr);
-  process.stderr.write = (chunk: any, encoding?: any, cb?: any) => {
+  process.stderr.write = (
+    chunk: Uint8Array | string,
+    encoding?: BufferEncoding | ((err?: Error) => void),
+    cb?: (err?: Error) => void
+  ): boolean => {
     append(logFile, 'stderr', chunk.toString());
-    return originalStderrWrite(chunk, encoding, cb);
+    // @ts-expect-error: originalStderrWrite may have a slightly different signature, but this matches Node.js types
+    return originalStderrWrite(chunk, encoding as any, cb);
   };
 }
