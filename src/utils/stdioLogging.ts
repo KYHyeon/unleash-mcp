@@ -36,21 +36,30 @@ export function enableStdioLogging(): void {
   process.stdout.write = (
     chunk: Uint8Array | string,
     encoding?: BufferEncoding | ((err?: Error) => void),
-    cb?: (err?: Error) => void
+    cb?: (err?: Error) => void,
   ): boolean => {
     append(logFile, 'stdout', chunk.toString());
-    // @ts-expect-error: originalStdoutWrite may have a slightly different signature, but this matches Node.js types
-    return originalStdoutWrite(chunk, encoding as any, cb);
+
+    return originalStdoutWrite(
+      chunk,
+      // @ts-expect-error: encoding can either be a BufferEncoding or a callback, but this matches Node.js types
+      encoding,
+      cb,
+    );
   };
 
   const originalStderrWrite = process.stderr.write.bind(process.stderr);
   process.stderr.write = (
     chunk: Uint8Array | string,
     encoding?: BufferEncoding | ((err?: Error) => void),
-    cb?: (err?: Error) => void
+    cb?: (err?: Error) => void,
   ): boolean => {
     append(logFile, 'stderr', chunk.toString());
-    // @ts-expect-error: originalStderrWrite may have a slightly different signature, but this matches Node.js types
-    return originalStderrWrite(chunk, encoding as any, cb);
+    return originalStderrWrite(
+      chunk,
+      // @ts-expect-error: encoding can either be a BufferEncoding or a callback, but this matches Node.js types
+      encoding,
+      cb,
+    );
   };
 }
