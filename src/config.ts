@@ -89,7 +89,7 @@ export function loadConfig(): Config {
 function normalizeBaseUrl(url: string): string {
   try {
     const parsed = new URL(url);
-    // Collapse multiple slashes in the path and remove a trailing slash (except when path is root).
+    // Collapse multiple slashes in the path, remove trailing slashes, and preserve root path if pathname becomes empty.
     parsed.pathname = parsed.pathname.replace(/\/{2,}/g, '/').replace(/\/+$/, '') || '/';
     return parsed.toString();
   } catch {
