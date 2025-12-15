@@ -28,7 +28,7 @@ export function enableStdioLogging(): void {
 
   // Capture inbound data without affecting existing listeners.
   process.stdin.on('data', (chunk: Buffer | string) => {
-    append(logFile, 'stdin', chunk.toString());
+      append(logFile, 'stdin', chunk.toString());
   });
 
   // Patch stdout/stderr writes to tee to file while preserving normal behavior.
@@ -38,14 +38,14 @@ export function enableStdioLogging(): void {
     encoding?: BufferEncoding | ((err?: Error) => void),
     cb?: (err?: Error) => void,
   ): boolean => {
-    append(logFile, 'stdout', chunk.toString());
+      append(logFile, 'stdout', chunk.toString());
 
-    return originalStdoutWrite(
-      chunk,
-      // @ts-expect-error: encoding can either be a BufferEncoding or a callback, but this matches Node.js types
-      encoding,
-      cb,
-    );
+      return originalStdoutWrite(
+        chunk,
+        // @ts-expect-error: encoding can either be a BufferEncoding or a callback, but this matches Node.js types
+        encoding,
+        cb,
+      );
   };
 
   const originalStderrWrite = process.stderr.write.bind(process.stderr);
@@ -54,12 +54,12 @@ export function enableStdioLogging(): void {
     encoding?: BufferEncoding | ((err?: Error) => void),
     cb?: (err?: Error) => void,
   ): boolean => {
-    append(logFile, 'stderr', chunk.toString());
-    return originalStderrWrite(
-      chunk,
-      // @ts-expect-error: encoding can either be a BufferEncoding or a callback, but this matches Node.js types
-      encoding,
-      cb,
-    );
+      append(logFile, 'stderr', chunk.toString());
+      return originalStderrWrite(
+        chunk,
+        // @ts-expect-error: encoding can either be a BufferEncoding or a callback, but this matches Node.js types
+        encoding,
+        cb,
+      );
   };
 }
