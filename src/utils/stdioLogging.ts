@@ -26,8 +26,8 @@ export function enableStdioLogging(): void {
     return;
   }
 
-  // Capture inbound data without affecting existing listeners.
-  process.stdin.on('data', (chunk: Buffer | string) => {
+  // Capture inbound data and ensure we run before other listeners by prepending.
+  process.stdin.prependListener('data', (chunk: Buffer | string) => {
     append(logFile, 'stdin', chunk.toString());
   });
 
