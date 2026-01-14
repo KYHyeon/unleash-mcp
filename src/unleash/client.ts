@@ -300,6 +300,9 @@ export class UnleashClient {
       disabled: options.disabled,
       parameters,
       ...(options.variants && options.variants.length > 0 ? { variants: options.variants } : {}),
+      ...(options.constraints && options.constraints.length > 0
+        ? { constraints: options.constraints }
+        : {}),
     };
 
     if (this.dryRun) {
@@ -311,6 +314,7 @@ export class UnleashClient {
         featureName,
         parameters,
         variants: payload.variants ?? [],
+        constraints: payload.constraints ?? [],
       };
     }
 
