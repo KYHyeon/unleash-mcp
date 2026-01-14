@@ -69,6 +69,40 @@ export interface StrategyVariant {
   [key: string]: unknown;
 }
 
+/**
+ * Constraint operators supported by Unleash.
+ * See: https://docs.getunleash.io/reference/activation-strategies
+ */
+export type ConstraintOperator =
+  | 'IN'
+  | 'NOT_IN'
+  | 'STR_CONTAINS'
+  | 'STR_STARTS_WITH'
+  | 'STR_ENDS_WITH'
+  | 'NUM_EQ'
+  | 'NUM_GT'
+  | 'NUM_GTE'
+  | 'NUM_LT'
+  | 'NUM_LTE'
+  | 'SEMVER_EQ'
+  | 'SEMVER_GT'
+  | 'SEMVER_GTE'
+  | 'SEMVER_LT'
+  | 'SEMVER_LTE';
+
+/**
+ * Strategy constraint for targeting.
+ * See: https://docs.getunleash.io/reference/activation-strategies
+ */
+export interface StrategyConstraint {
+  contextName: string;
+  operator: ConstraintOperator;
+  values?: string[];
+  value?: string;
+  caseInsensitive?: boolean;
+  inverted?: boolean;
+}
+
 export interface SetFlagRolloutOptions {
   rolloutPercentage: number;
   groupId?: string;
@@ -76,6 +110,7 @@ export interface SetFlagRolloutOptions {
   title?: string;
   disabled?: boolean;
   variants?: StrategyVariant[];
+  constraints?: StrategyConstraint[];
 }
 
 export interface FeatureStrategy {
