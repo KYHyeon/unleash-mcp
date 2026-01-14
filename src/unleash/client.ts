@@ -84,11 +84,11 @@ export type ConstraintOperator =
   | 'NUM_GTE'
   | 'NUM_LT'
   | 'NUM_LTE'
+  | 'DATE_AFTER'
+  | 'DATE_BEFORE'
   | 'SEMVER_EQ'
   | 'SEMVER_GT'
-  | 'SEMVER_GTE'
-  | 'SEMVER_LT'
-  | 'SEMVER_LTE';
+  | 'SEMVER_LT';
 
 /**
  * Strategy constraint for targeting.
@@ -121,7 +121,7 @@ export interface FeatureStrategy {
   featureName?: string;
   sortOrder?: number;
   segments?: number[];
-  constraints?: Array<Record<string, unknown>>;
+  constraints?: StrategyConstraint[];
   variants?: StrategyVariant[];
   parameters: Record<string, string>;
 }

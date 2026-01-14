@@ -38,11 +38,11 @@ const constraintOperatorSchema = z.enum([
   'NUM_GTE',
   'NUM_LT',
   'NUM_LTE',
+  'DATE_AFTER',
+  'DATE_BEFORE',
   'SEMVER_EQ',
   'SEMVER_GT',
-  'SEMVER_GTE',
   'SEMVER_LT',
-  'SEMVER_LTE',
 ]);
 
 const constraintSchema = z

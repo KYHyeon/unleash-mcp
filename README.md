@@ -551,7 +551,8 @@ Constraints allow you to target specific users based on context fields. Each con
 - Basic: `IN`, `NOT_IN`
 - String: `STR_CONTAINS`, `STR_STARTS_WITH`, `STR_ENDS_WITH`
 - Numeric: `NUM_EQ`, `NUM_GT`, `NUM_GTE`, `NUM_LT`, `NUM_LTE`
-- Semver: `SEMVER_EQ`, `SEMVER_GT`, `SEMVER_GTE`, `SEMVER_LT`, `SEMVER_LTE`
+- Date: `DATE_AFTER`, `DATE_BEFORE`
+- Semver: `SEMVER_EQ`, `SEMVER_GT`, `SEMVER_LT`
 
 #### Usage example
 
